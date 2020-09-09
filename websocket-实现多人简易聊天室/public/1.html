@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="../public/moment.js"></script>
+</head>
+<style>
+    #textarea {
+        width: 800px;
+        height: 400px;
+        margin-left: 100px
+    }
+    
+    .text {
+        width: 1000px;
+        height: 500px;
+        margin: 0 auto
+    }
+    
+    .text h1 {
+        text-align: center;
+    }
+    
+    .ipt {
+        width: 300px;
+        margin-left: 300px;
+    }
+    
+    .btn {
+        background-color: red;
+        color: #fff;
+    }
+</style>
+
+<body>
+    <div class="text">
+        <h1>实时通讯</h1>
+        <textarea name="" id="textarea" cols="30" rows="10"></textarea>
+    </div>
+
+    <input type="text" id="content" class="ipt">
+    <button class="btn">发送</button>
+
+
+</body>
+<script>
+    //1.通过http请求，告诉服务器我要使用ws协议了 因为ws协议是根据已有的http协议升级而成的
+    let texarea = document.querySelector("#textarea")
+    let content = document.querySelector('#content')
+    let btn = document.querySelector('button')
+
+
+    //1.通过http请求，告诉服务器我要是用ws协议了,因为ws协议是根据已有的http协议升级而成的
+    const socket = io('/');
+
+    // btn.onclick = function() {
+    //     let newTime = moment().format('YYYY年MM月DD日LTS')
+    //     writeData(newTime + '我说:' + content.value)
+    //     socket.emit('message', content.value)
+    //     content.value = '';
+    //     content.focus();
+    // }
+    socket.on('time', data => {
+        btn.onclick = function() {
+            let newTime = moment().format('YYYY年MM月DD日LTS')
+            let data = newTime;
+            writeData(data + '我说:' + content.value)
+            socket.emit('message', content.value)
+            content.value = '';
+            content.focus();
+        }
+
+        document.onkeydown = function() {
+            if (event.keyCode === 13) {
+                btn.click()
+                return false
+            }
+        }
+
+    })
+    socket.on('hello', data => {
+        console.log(data);
+        writeData(data)
+    })
+    socket.on('update', data => {
+        console.log(data);
+    })
+    socket.on('message', data => {
+        writeData(data)
+    })
+
+
+    function writeData(data) {
+
+        return texarea.innerHTML += data + '\r\n'
+    }
+</script>
+
+</html>
